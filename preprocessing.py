@@ -45,5 +45,7 @@ def Preprocessing(image_path):
     kernel = np.ones((2,2), np.uint8) # Petit noyau
     opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
 
+    
+
     return opening
 

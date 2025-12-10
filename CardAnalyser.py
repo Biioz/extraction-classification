@@ -1,6 +1,5 @@
 import cv2
 import easyocr
-import re
 import numpy as np
 
 class CardAnalyser:
@@ -20,8 +19,6 @@ class CardAnalyser:
             "visual_elements": {},
             "text_analysis": [],
             "extracted_data": {
-                "dates": [],
-                "mrz": [],
                 "possible_names": [],
                 "type_carte": []
             }
@@ -61,35 +58,32 @@ class CardAnalyser:
             entry = {
                 "text": text,
                 "confidence": float(prob),
-                "bbox": clean_bbox # Coordonnées des 4 coins du mot
+                "bbox": clean_bbox 
             }
             self.results["text_analysis"].append(entry)
 
             # --- Extraction intelligente ---
-            
-            # 1. Détection de Dates (ex: 12/05/1990 ou 12.05.1990)
-            if re.search(r'\d{2}[./]\d{2}[./]\d{4}', text):
-                self.results["extracted_data"]["dates"].append(text)
 
             # # Détection MRZ (lignes avec beaucoup de <<<)
             # if "<<" in text and len(text) > 15:
             #     self.results["extracted_data"]["mrz"].append(text)
 
-            # 2. Détection de noms potentiels (Mots en MAJUSCULES sans chiffres, longueur > 2)
+            # Détection de noms potentiels (Mots en MAJUSCULES sans chiffres, longueur > 2)
             if text.isalpha() and len(text) > 2:
                 self.results["extracted_data"]["possible_names"].append(text)
 
+            # On s'assure que le type de carte n'a pas déjà été détecté
             if not self.results["extracted_data"]["type_carte"]:
                 
-                # 3. Détection des cartes d'identité
+                # Détection des cartes d'identité
                 if "CARTE NATIONALE DIDENTITÉ" in text:
                     self.results["extracted_data"]["type_carte"].append("Carte d'identité")
 
-                # 4. Détection des cartes de fidélité
+                # Détection des cartes de fidélité
                 if "FIDELITE" in text or "client" in text or "MA CARTE" in text:
                     self.results["extracted_data"]["type_carte"].append("Carte de fidélité")
 
-                # 5. Détection des cartes étudiantes
+                # Détection des cartes étudiantes
                 if "ETUDIANT" in text or "INE" in text:
                     self.results["extracted_data"]["type_carte"].append("Carte étudiante")
 

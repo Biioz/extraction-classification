@@ -1,4 +1,5 @@
 import CardAnalyser
+import preprocessing    
 import os
 import json
 
@@ -8,6 +9,8 @@ if __name__ == "__main__":
     image_input = "ressources\cartefidelite2.jpg" 
     
     if os.path.exists(image_input):
+
+        preprocessed_image = preprocessing.Preprocessing(image_input)
         
         analyzer =  CardAnalyser.CardAnalyser(image_input, use_gpu=False) 
         final_data = analyzer.run()
@@ -20,8 +23,6 @@ if __name__ == "__main__":
         analyzer.draw_results()
 
         print("\n--- ANALYSE TERMINÉE ---")
-        print("Dates trouvées :", final_data["extracted_data"]["dates"])
-        print("MRZ détectée :", final_data["extracted_data"]["mrz"])
         print("Noms potentiels :", final_data["extracted_data"]["possible_names"])
         print("Types de carte détectés :", final_data["extracted_data"]["type_carte"])
         print("Consultez 'resultats.json' pour le détail complet.")
