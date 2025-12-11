@@ -5,7 +5,7 @@ import numpy as np
 
 # CONFIGURATION
 # Update this path to point to your tesseract.exe
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 class DocumentAnalyzer:
     def __init__(self):
@@ -148,9 +148,27 @@ def run_video_mode():
         
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+        
+        # Vérifier si la fenêtre a été fermée
+        if cv2.getWindowProperty("Project Video Analysis", cv2.WND_PROP_VISIBLE) < 1:
+            print("Window closed")
+            break
             
     cap.release()
     cv2.destroyAllWindows()
+    
+def process_frame(frame):
+    """
+    Analyse un frame et retourne un frame annoté.
+    Aucun appel Streamlit ou imshow ici.
+    """
+    gray, blurred = analyzer.preprocess_image(frame)
+    features = analyzer.extract_features(frame, blurred)
+    category = analyzer.classify_document(features)
+    result_frame = analyzer.draw_results(frame, features, category)
+
+    return result_frame
+    
 
 def run_image_mode(image_path):
     print(f"--- Processing {image_path} ---")
@@ -175,7 +193,7 @@ def run_image_mode(image_path):
     cv2.destroyAllWindows()
 
 # Run the live video
-run_video_mode()
+# run_video_mode()
 
 # run_image_mode('ressources\carteetudiant2.jpg')
 
