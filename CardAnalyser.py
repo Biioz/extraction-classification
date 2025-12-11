@@ -1,34 +1,31 @@
 import cv2
 import pytesseract
-from pytesseract import Output # Import Output to get dictionary format
+from pytesseract import Output
 
-# CONFIGURATION
-# path to point to your tesseract.exe
+# path to point to tesseract.exe
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 class CardAnalyzer:
     def __init__(self):
-        # Load the Face Detector
-        # Make sure 'haarcascade_frontalface_default.xml' is in the same folder
+        # Load the Face Detector (haarcascade_frontalface_default.xml)
         self.face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
-    # MODULE 1: PREPROCESSING
+    # Convert the image to grayscale and apply Gaussian blur
     def preprocess_image(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        gray_resized = cv2.resize(gray, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
-        return gray_resized, blurred
+        return gray, blurred
 
-    # MODULE 2: SEGMENTATION & EXTRACTION
+    # This method extracts text and detects faces in the image
     def extract_features(self, image, gray_image):
         features = {
             "text": "",
-            "text_coords": [], # List to store text bounding boxes
+            "text_coords": [],
             "has_face": False,
             "face_coords": []
         }
 
-        # 1. Text Extraction (Updated to get coordinates)
+        # 1. Text Extraction 
         # output_type=Output.DICT gives us a dictionary with 'left', 'top', 'width', 'height', 'text'
         data = pytesseract.image_to_data(gray_image, output_type=Output.DICT)
         
@@ -37,7 +34,7 @@ class CardAnalyzer:
         
         for i in range(n_boxes):
             # Filter out empty text and low confidence results (noise)
-            if int(data['conf'][i]) > 40: 
+            if int(data['conf'][i]) > 20: 
                 word = data['text'][i].strip()
                 if word:
                     # Store the word and its coordinates
@@ -62,11 +59,12 @@ class CardAnalyzer:
 
         return features
 
-    # MODULE 3: CLASSIFICATION
+    # This method classifies the document based on extracted features and defined rules 
     def classify_document(self, features):
         text = features["text"]
         has_face = features["has_face"]
         
+        # Define keywords for each category
         id_keywords = ["republique", "française", "identite","d'identite", "national"]
         student_keywords = ["etudiant", "universite", "ecole", "ine"]
         loyalty_keywords = ["fidelite", "points", "magasin", "client"]
@@ -99,20 +97,20 @@ class CardAnalyzer:
             return "UNKNOWN"
         return best_match
 
-    # VISUALIZATION
+    # This method draws rectangles around detected features and displays the classification result
     def draw_results(self, image, features, category):
         output = image.copy()
         
-        # 1. Draw Text Rectangles (Yellow)
+        # Draw Text Rectangles (Yellow)
         for (x, y, w, h) in features["text_coords"]:
             cv2.rectangle(output, (x, y), (x + w, y + h), (0, 255, 255), 1)
 
-        # 2. Draw Face Rectangles (Blue)
+        # Draw Face Rectangles (Blue)
         for (x, y, w, h) in features["face_coords"]:
             cv2.rectangle(output, (x, y), (x + w, y + h), (255, 0, 0), 2)
             cv2.putText(output, "Face", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-        # 3. Draw Classification Label (Green)
+        # Draw Classification Label (Green)
         cv2.putText(output, f"Type: {category}", (20, 50), 
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         
@@ -135,7 +133,7 @@ class CardAnalyzer:
 
             # Process frame
             gray, blurred = self.preprocess_image(frame)
-            features = self.extract_features(frame, gray)
+            features = self.extract_features(frame, blurred)
             category = self.classify_document(features)
             
             # Draw
@@ -166,7 +164,10 @@ class CardAnalyzer:
         print(f"Result: {category}")
 
         # Show result
-        result_img = self.draw_results(img, features, category)
+        result_img = self.draw_results(blurred, features, category)
+        cv2.namedWindow("Result", cv2.WINDOW_NORMAL)
+        # 2. Resize the window to something reasonable (e.g., 800x600 or 600x800)
+        cv2.resizeWindow("Result", 800, 600)
         cv2.imshow("Result", result_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
