@@ -3,7 +3,7 @@ import pytesseract
 from pytesseract import Output
 
 # path to point to tesseract.exe
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 class CardAnalyzer:
     def __init__(self):
