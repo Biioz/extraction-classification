@@ -110,9 +110,9 @@ class CardAnalyzer:
             cv2.rectangle(output, (x, y), (x + w, y + h), (255, 0, 0), 2)
             cv2.putText(output, "Face", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-        # Draw Classification Label (Green)
-        cv2.putText(output, f"Type: {category}", (20, 50), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        # # Draw Classification Label (Green)
+        # cv2.putText(output, f"Type: {category}", (20, 50), 
+        #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         
         return output
     
