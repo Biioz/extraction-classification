@@ -61,7 +61,7 @@ class CardAnalyzer:
 
     # This method classifies the document based on extracted features and defined rules 
     def classify_document(self, features):
-        text = features["text"]
+        text = features["text"].lower()
         has_face = features["has_face"]
         
         # Define keywords for each category
@@ -95,7 +95,7 @@ class CardAnalyzer:
         best_match = max(scores, key=scores.get)
         if scores[best_match] == 0:
             return "UNKNOWN"
-        return best_match
+        return best_match, scores
 
     # This method draws rectangles around detected features and displays the classification result
     def draw_results(self, image, features, category):
@@ -133,8 +133,8 @@ class CardAnalyzer:
 
             # Process frame
             gray, blurred = self.preprocess_image(frame)
-            features = self.extract_features(frame, blurred)
-            category = self.classify_document(features)
+            features = self.extract_features(frame, gray)
+            category,scores = self.classify_document(features)
             
             # Draw
             result_frame = self.draw_results(frame, features, category)
@@ -156,8 +156,8 @@ class CardAnalyzer:
 
         # Pipeline
         gray, blurred = self.preprocess_image(img)
-        features = self.extract_features(img, blurred)
-        category = self.classify_document(features)
+        features = self.extract_features(img, gray)
+        category,scores = self.classify_document(features)
         
         print(f"Detected Text Snippet: {features['text'][:50]}...")
         print(f"Face Detected: {features['has_face']}")

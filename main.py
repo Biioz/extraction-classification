@@ -21,8 +21,8 @@ def run_video_mode():
 
         # Process frame
         gray, blurred = analyzer.preprocess_image(frame)
-        features = analyzer.extract_features(frame, blurred)
-        category = analyzer.classify_document(features)
+        features = analyzer.extract_features(frame, gray)
+        category,scores = analyzer.classify_document(features)
         
         # Draw
         result_frame = analyzer.draw_results(frame, features, category)
@@ -47,10 +47,10 @@ def process_frame(frame):
     """
     gray, blurred = analyzer.preprocess_image(frame)
     features = analyzer.extract_features(frame, blurred)
-    category = analyzer.classify_document(features)
+    category,scores = analyzer.classify_document(features)
     result_frame = analyzer.draw_results(frame, features, category)
 
-    return result_frame , gray, blurred, features, category
+    return result_frame , gray, blurred, features, category, scores
     
 
 def run_image_mode(image_path):
@@ -62,8 +62,8 @@ def run_image_mode(image_path):
 
     # Pipeline
     gray, blurred = analyzer.preprocess_image(img)
-    features = analyzer.extract_features(img, blurred)
-    category = analyzer.classify_document(features)
+    features = analyzer.extract_features(img, gray)
+    category,scores = analyzer.classify_document(features)
     
     print(f"Detected Text Snippet: {features['text'][:50]}...")
     print(f"Face Detected: {features['has_face']}")
