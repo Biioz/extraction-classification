@@ -4,7 +4,7 @@ import av
 import cv2
 import numpy as np
 import time
-from main import process_frame
+from main_easyocr import process_frame
 
 # Variables globales pour le calcul du FPS
 frame_count = 0

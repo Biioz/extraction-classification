@@ -2,6 +2,7 @@ import streamlit as st
 import cv2
 import numpy as np
 from main import process_frame
+from main_easyocr import process_frame as process_frame_easy
 
 st.title('Document Extraction and Classification')
 st.set_page_config(layout="wide")
@@ -10,13 +11,22 @@ st.set_page_config(layout="wide")
 st.subheader("Upload a picture")
 uploaded_file = st.file_uploader("Choose a file", type=["png", "jpg", "jpeg"])
 
+st.session_state["ocr_mode"] = st.selectbox(
+    "Select OCR Mode",
+    ("Tesseract OCR", "EasyOCR")
+)
+
+
 if uploaded_file is not None:
     # Convert the uploaded file to a numpy array
     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
     img = cv2.imdecode(file_bytes, 1)
 
     # Process the image
-    processed_img, gray, blurred, features, category = process_frame(img)
+    if st.session_state["ocr_mode"] == "Tesseract OCR":
+        processed_img, gray, blurred, features, category = process_frame(img)
+    else:
+        processed_img, gray, blurred, features, category = process_frame_easy(img)
 
 
     st.subheader("Classified Category")
